@@ -46,10 +46,7 @@ func (s *LinkStatusAPI) WS(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id := params["id"]
 
-	log.Printf("id: %v", id)
-
 	conn, _ := wshub.Upgrader.Upgrade(w, r, nil)
-
 	client := &wshub.Client{ID: id, Hub: s.hub, Conn: conn, Send: make(chan []byte)}
 	client.Hub.Register <- client
 
