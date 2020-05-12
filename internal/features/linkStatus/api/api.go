@@ -6,17 +6,18 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 )
 
 // LinkStatusAPI : LinkStatusAPI
 type LinkStatusAPI struct {
-	hub *Hub
+	hub *wshub.Hub
 }
 
 // NewAPI : NewAPI
 func NewAPI() (*LinkStatusAPI, error) {
-	hub := newHub()
-	go hub.run()
+	hub := wshub.NewHub()
+	go hub.Run()
 
 	s := &LinkStatusAPI{
 		hub: hub,
@@ -34,7 +35,7 @@ func (s *LinkStatusAPI) AddLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		s.hub.sendRestricted <- Message{ids: []string{"cliendId123"}, data: []byte(body)}
+		s.hub.SendRestricted <- wshub.Message{ClientIds: []string{"cliendId123"}, Data: []byte(body)}
 	}()
 
 	w.WriteHeader(201)
@@ -47,10 +48,10 @@ func (s *LinkStatusAPI) WS(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("id: %v", id)
 
-	conn, _ := upgrader.Upgrade(w, r, nil)
+	conn, _ := wshub.Upgrader.Upgrade(w, r, nil)
 
-	client := &Client{id: id, hub: s.hub, conn: conn, send: make(chan []byte)}
-	client.hub.register <- client
+	client := &wshub.Client{ID: id, Hub: s.hub, Conn: conn, Send: make(chan []byte)}
+	client.Hub.Register <- client
 
-	go client.writePump()
+	go client.WritePump()
 }

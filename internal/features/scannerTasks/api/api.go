@@ -4,17 +4,19 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 )
 
 // ScannerTasksAPI : ScannerTasksAPI
 type ScannerTasksAPI struct {
-	hub *Hub
+	hub *wshub.Hub
 }
 
 // NewAPI : NewAPI
 func NewAPI() (*ScannerTasksAPI, error) {
-	hub := newHub()
-	go hub.run()
+	hub := wshub.NewHub()
+	go hub.Run()
 
 	s := &ScannerTasksAPI{
 		hub: hub,
@@ -32,7 +34,7 @@ func (s *ScannerTasksAPI) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		s.hub.broadcast <- []byte(body)
+		s.hub.Broadcast <- []byte(body)
 	}()
 
 	w.WriteHeader(201)
@@ -40,10 +42,10 @@ func (s *ScannerTasksAPI) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 // WS : WS
 func (s *ScannerTasksAPI) WS(w http.ResponseWriter, r *http.Request) {
-	conn, _ := upgrader.Upgrade(w, r, nil)
+	conn, _ := wshub.Upgrader.Upgrade(w, r, nil)
 
-	client := &Client{id: conn.RemoteAddr().String(), hub: s.hub, conn: conn, send: make(chan []byte)}
-	client.hub.register <- client
+	client := &wshub.Client{ID: conn.RemoteAddr().String(), Hub: s.hub, Conn: conn, Send: make(chan []byte)}
+	client.Hub.Register <- client
 
-	go client.writePump()
+	go client.WritePump()
 }
