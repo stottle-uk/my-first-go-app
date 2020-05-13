@@ -35,7 +35,7 @@ func (s *LinkStatusAPI) AddLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		s.hub.SendRestricted <- wshub.Message{ClientIds: []string{"cliendId123"}, Data: []byte(body)}
+		s.hub.SendRestricted <- wshub.Message{ClientIds: []string{"cliendId123"}, Data: body}
 	}()
 
 	w.WriteHeader(201)

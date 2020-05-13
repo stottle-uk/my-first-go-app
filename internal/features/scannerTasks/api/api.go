@@ -34,7 +34,7 @@ func (s *ScannerTasksAPI) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		s.hub.Broadcast <- []byte(body)
+		s.hub.Broadcast <- body
 	}()
 
 	w.WriteHeader(201)
