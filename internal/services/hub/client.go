@@ -34,8 +34,6 @@ func (c *client) writePump() {
 	for {
 		select {
 		case message, ok := <-c.send:
-			log.Printf("writePump message: %s", message)
-
 			if !ok {
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return

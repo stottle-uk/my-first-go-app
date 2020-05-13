@@ -16,6 +16,5 @@ func Init(router *mux.Router, hub *wshub.Hub) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	linkStatusRouter := router.PathPrefix("/link-status").Subrouter()
-	linkStatusRouter.HandleFunc("", linkStatusAPI.AddLink).Methods("POST")
+	router.HandleFunc("", linkStatusAPI.AddLink).Methods("POST")
 }

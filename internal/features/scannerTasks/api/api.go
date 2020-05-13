@@ -24,8 +24,6 @@ func NewAPI(options Options) (*API, error) {
 		hub: options.Hub,
 	}
 
-	go s.handleReceived()
-
 	return s, nil
 }
 
@@ -45,7 +43,8 @@ func (s *API) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(201)
 }
 
-func (s *API) handleReceived() {
+// HandleReceived : HandleReceived
+func (s *API) HandleReceived() {
 	for {
 		select {
 		case message := <-s.hub.Received:

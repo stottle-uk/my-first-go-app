@@ -16,6 +16,7 @@ func Init(router *mux.Router, hub *wshub.Hub) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	scannerTasksRouter := router.PathPrefix("/scanner-tasks").Subrouter()
-	scannerTasksRouter.HandleFunc("/{id:[0-9]+}", scannertasksAPI.UpdateTask).Methods("POST")
+	router.HandleFunc("/{id:[0-9]+}", scannertasksAPI.UpdateTask).Methods("POST")
+
+	go scannertasksAPI.HandleReceived()
 }
