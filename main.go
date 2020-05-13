@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	linkstatusapi "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/api"
-	scannertasksapi "github.com/stottle-uk/my-first-go-app/internal/features/scannerTasks/api"
+	linkstatus "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/api"
+	scannertasks "github.com/stottle-uk/my-first-go-app/internal/features/scannerTasks"
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 )
 
@@ -15,8 +15,8 @@ func main() {
 	router := mux.NewRouter()
 	hub, handler := wshub.CreateHub()
 
-	scannertasksapi.ScannerTasks(router, hub)
-	linkstatusapi.LinkStatus(router, hub)
+	scannertasks.Init(router, hub)
+	linkstatus.Init(router, hub)
 	webSockets(router, handler)
 
 	http.Handle("/", router)
