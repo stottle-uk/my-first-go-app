@@ -1,42 +1,28 @@
 package wshub
 
 import (
-	"net/http"
-
 	"github.com/gorilla/websocket"
 )
 
 // Client : Client
 type Client struct {
-	ID   string
-	Hub  *Hub
-	Conn *websocket.Conn
-	Send chan []byte
+	id   string
+	conn *websocket.Conn
+	send chan []byte
 }
 
-// Upgrader : Upgrader
-var Upgrader = websocket.Upgrader{
-	ReadBufferSize:    1024,
-	WriteBufferSize:   1024,
-	EnableCompression: true,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-// WritePump : WritePump
-func (c *Client) WritePump() {
-	defer c.Conn.Close()
+func (c *Client) writePump() {
+	defer c.conn.Close()
 
 	for {
 		select {
-		case message, ok := <-c.Send:
+		case message, ok := <-c.send:
 			if !ok {
-				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 
-			w, err := c.Conn.NextWriter(websocket.TextMessage)
+			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
 			}

@@ -8,18 +8,20 @@ import (
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 )
 
+// Options : Options
+type Options struct {
+	Hub *wshub.Hub
+}
+
 // ScannerTasksAPI : ScannerTasksAPI
 type ScannerTasksAPI struct {
 	hub *wshub.Hub
 }
 
 // NewAPI : NewAPI
-func NewAPI() (*ScannerTasksAPI, error) {
-	hub := wshub.NewHub()
-	go hub.Run()
-
+func NewAPI(options Options) (*ScannerTasksAPI, error) {
 	s := &ScannerTasksAPI{
-		hub: hub,
+		hub: options.Hub,
 	}
 	return s, nil
 }
@@ -38,14 +40,4 @@ func (s *ScannerTasksAPI) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	w.WriteHeader(201)
-}
-
-// WS : WS
-func (s *ScannerTasksAPI) WS(w http.ResponseWriter, r *http.Request) {
-	conn, _ := wshub.Upgrader.Upgrade(w, r, nil)
-
-	client := &wshub.Client{ID: conn.RemoteAddr().String(), Hub: s.hub, Conn: conn, Send: make(chan []byte)}
-	client.Hub.Register <- client
-
-	go client.WritePump()
 }

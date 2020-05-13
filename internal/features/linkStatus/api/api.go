@@ -5,9 +5,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 )
+
+// Options : Options
+type Options struct {
+	Hub *wshub.Hub
+}
 
 // LinkStatusAPI : LinkStatusAPI
 type LinkStatusAPI struct {
@@ -15,12 +19,9 @@ type LinkStatusAPI struct {
 }
 
 // NewAPI : NewAPI
-func NewAPI() (*LinkStatusAPI, error) {
-	hub := wshub.NewHub()
-	go hub.Run()
-
+func NewAPI(options Options) (*LinkStatusAPI, error) {
 	s := &LinkStatusAPI{
-		hub: hub,
+		hub: options.Hub,
 	}
 	return s, nil
 }
@@ -39,16 +40,4 @@ func (s *LinkStatusAPI) AddLink(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	w.WriteHeader(201)
-}
-
-// WS : WS
-func (s *LinkStatusAPI) WS(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["id"]
-
-	conn, _ := wshub.Upgrader.Upgrade(w, r, nil)
-	client := &wshub.Client{ID: id, Hub: s.hub, Conn: conn, Send: make(chan []byte)}
-	client.Hub.Register <- client
-
-	go client.WritePump()
 }

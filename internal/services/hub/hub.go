@@ -1,5 +1,12 @@
 package wshub
 
+import (
+	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
+)
+
 // Message : Message
 type Message struct {
 	ClientIds []string
@@ -9,43 +16,67 @@ type Message struct {
 // Hub : Hub
 type Hub struct {
 	clients        map[string]*Client
+	register       chan *Client
+	unregister     chan *Client
 	Broadcast      chan []byte
 	SendRestricted chan Message
-	Register       chan *Client
-	Unregister     chan *Client
 }
 
-// NewHub : NewHub
-func NewHub() *Hub {
-	return &Hub{
-		Broadcast:      make(chan []byte),
-		SendRestricted: make(chan Message),
-		Register:       make(chan *Client),
-		Unregister:     make(chan *Client),
-		clients:        make(map[string]*Client),
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:    1024,
+	WriteBufferSize:   1024,
+	EnableCompression: true,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+// CreateHub : CreateHub
+func CreateHub() (*Hub, func(w http.ResponseWriter, r *http.Request)) {
+	hub := newHub()
+	go hub.run()
+
+	return hub, func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		id := params["id"]
+
+		conn, _ := upgrader.Upgrade(w, r, nil)
+		client := &Client{id: id, conn: conn, send: make(chan []byte)}
+		hub.register <- client
+
+		go client.writePump()
 	}
 }
 
-// Run : Run
-func (h *Hub) Run() {
+func newHub() *Hub {
+	return &Hub{
+		clients:        make(map[string]*Client),
+		register:       make(chan *Client),
+		unregister:     make(chan *Client),
+		Broadcast:      make(chan []byte),
+		SendRestricted: make(chan Message),
+	}
+}
+
+func (h *Hub) run() {
 	for {
 		select {
-		case client := <-h.Register:
-			h.clients[client.ID] = client
+		case client := <-h.register:
+			h.clients[client.id] = client
 
-		case client := <-h.Unregister:
-			if _, ok := h.clients[client.ID]; ok {
-				delete(h.clients, client.ID)
-				close(client.Send)
+		case client := <-h.unregister:
+			if _, ok := h.clients[client.id]; ok {
+				delete(h.clients, client.id)
+				close(client.send)
 			}
 
 		case message := <-h.Broadcast:
 			for _, client := range h.clients {
 				select {
-				case client.Send <- message:
+				case client.send <- message:
 				default:
-					delete(h.clients, client.ID)
-					close(client.Send)
+					delete(h.clients, client.id)
+					close(client.send)
 				}
 			}
 
@@ -54,10 +85,10 @@ func (h *Hub) Run() {
 				client, ok := h.clients[id]
 				if ok {
 					select {
-					case client.Send <- m.Data:
+					case client.send <- m.Data:
 					default:
-						delete(h.clients, client.ID)
-						close(client.Send)
+						delete(h.clients, client.id)
+						close(client.send)
 					}
 				}
 			}
