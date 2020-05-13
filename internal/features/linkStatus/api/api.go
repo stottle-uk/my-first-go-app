@@ -1,29 +1,34 @@
 package linkstatusapi
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 )
-
-// Options : Options
-type Options struct {
-	Hub *wshub.Hub
-}
 
 // LinkStatusAPI : LinkStatusAPI
 type LinkStatusAPI struct {
 	hub *wshub.Hub
 }
 
-// NewAPI : NewAPI
-func NewAPI(options Options) (*LinkStatusAPI, error) {
-	s := &LinkStatusAPI{
-		hub: options.Hub,
+type options struct {
+	Hub *wshub.Hub
+}
+
+// LinkStatus : LinkStatus
+func LinkStatus(router *mux.Router, hub *wshub.Hub) {
+	linkStatusAPI, err := newAPI(options{
+		Hub: hub,
+	})
+	if err != nil {
+		fmt.Println(err)
 	}
-	return s, nil
+	linkStatusRouter := router.PathPrefix("/link-status").Subrouter()
+	linkStatusRouter.HandleFunc("", linkStatusAPI.AddLink).Methods("POST")
 }
 
 // AddLink : AddLink
@@ -40,4 +45,11 @@ func (s *LinkStatusAPI) AddLink(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	w.WriteHeader(201)
+}
+
+func newAPI(options options) (*LinkStatusAPI, error) {
+	s := &LinkStatusAPI{
+		hub: options.Hub,
+	}
+	return s, nil
 }

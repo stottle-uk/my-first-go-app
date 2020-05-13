@@ -1,22 +1,41 @@
 package wshub
 
 import (
+	"log"
+
 	"github.com/gorilla/websocket"
 )
 
-// Client : Client
-type Client struct {
-	id   string
-	conn *websocket.Conn
-	send chan []byte
+type client struct {
+	id       string
+	conn     *websocket.Conn
+	send     chan []byte
+	received chan []byte
 }
 
-func (c *Client) writePump() {
+func (c *client) readPump() {
+	defer c.conn.Close()
+
+	for {
+		_, message, err := c.conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("error: %v", err)
+			}
+			break
+		}
+		c.received <- message
+	}
+}
+
+func (c *client) writePump() {
 	defer c.conn.Close()
 
 	for {
 		select {
 		case message, ok := <-c.send:
+			log.Printf("writePump message: %s", message)
+
 			if !ok {
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return

@@ -15,9 +15,10 @@ type Message struct {
 
 // Hub : Hub
 type Hub struct {
-	clients        map[string]*Client
-	register       chan *Client
-	unregister     chan *Client
+	clients        map[string]*client
+	register       chan *client
+	unregister     chan *client
+	Received       chan []byte
 	Broadcast      chan []byte
 	SendRestricted chan Message
 }
@@ -39,22 +40,42 @@ func CreateHub() (*Hub, func(w http.ResponseWriter, r *http.Request)) {
 	return hub, func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		id := params["id"]
+		client := newClient(id, w, r)
 
-		conn, _ := upgrader.Upgrade(w, r, nil)
-		client := &Client{id: id, conn: conn, send: make(chan []byte)}
 		hub.register <- client
 
+		go client.readPump()
 		go client.writePump()
+		go hub.handleReceived(client)
 	}
 }
 
 func newHub() *Hub {
 	return &Hub{
-		clients:        make(map[string]*Client),
-		register:       make(chan *Client),
-		unregister:     make(chan *Client),
+		clients:        make(map[string]*client),
+		register:       make(chan *client),
+		unregister:     make(chan *client),
+		Received:       make(chan []byte),
 		Broadcast:      make(chan []byte),
 		SendRestricted: make(chan Message),
+	}
+}
+
+func newClient(id string, w http.ResponseWriter, r *http.Request) *client {
+	conn, _ := upgrader.Upgrade(w, r, nil)
+	return &client{
+		id:       id,
+		conn:     conn,
+		send:     make(chan []byte),
+		received: make(chan []byte)}
+}
+
+func (h *Hub) handleReceived(client *client) {
+	for {
+		select {
+		case message := <-client.received:
+			h.Received <- message
+		}
 	}
 }
 
@@ -80,12 +101,12 @@ func (h *Hub) run() {
 				}
 			}
 
-		case m := <-h.SendRestricted:
-			for _, id := range m.ClientIds {
+		case message := <-h.SendRestricted:
+			for _, id := range message.ClientIds {
 				client, ok := h.clients[id]
 				if ok {
 					select {
-					case client.send <- m.Data:
+					case client.send <- message.Data:
 					default:
 						delete(h.clients, client.id)
 						close(client.send)
