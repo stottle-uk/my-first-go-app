@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	linkstatus "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus"
 	scannertasks "github.com/stottle-uk/my-first-go-app/internal/features/scannerTasks"
+	websocket "github.com/stottle-uk/my-first-go-app/internal/features/websocket"
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 )
 
@@ -15,15 +16,14 @@ func main() {
 	router := mux.NewRouter()
 	hub, handler := wshub.CreateHub()
 
-	scannertasks.Init(router.PathPrefix("/scanner-tasks").Subrouter(), hub)
-	linkstatus.Init(router.PathPrefix("/link-status").Subrouter(), hub)
-
-	webSockets(router, handler)
+	scannertasks.Init(subRouter(router, "/scanner-tasks"), hub)
+	linkstatus.Init(subRouter(router, "/link-status"), hub)
+	websocket.Init(subRouter(router, "/ws"), handler)
 
 	http.Handle("/", router)
 	http.ListenAndServe(":8080", nil)
 }
 
-func webSockets(router *mux.Router, handler func(w http.ResponseWriter, r *http.Request)) {
-	router.HandleFunc("/ws/{id}", handler)
+func subRouter(router *mux.Router, path string) *mux.Router {
+	return router.PathPrefix(path).Subrouter()
 }
