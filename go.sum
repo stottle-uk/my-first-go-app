@@ -34,6 +34,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/reactivex/rxgo v1.0.0 h1:qpT8/kVwAJDSeGsqx4oUXxgk3UCtAq/EreBGWYRxEcA=
 github.com/reactivex/rxgo/v2 v2.0.1 h1:BWnkOfj4nYkeHOWi56ztXSxFuzuBCigrAOBuAOc4HPg=
 github.com/reactivex/rxgo/v2 v2.0.1/go.mod h1:HeaTW1/VQnad+xq1IqXnBjwsVHkJHriBNOApQVD5XfA=
+github.com/rs/cors v1.7.0 h1:+88SsELBHx5r+hZ8TCkggzSstaWNbDvThkVK8H6f9ik=
+github.com/rs/cors v1.7.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0 h1:Hbg2NidpLE8veEBkEZTL3CvlkUIVzuU9jDplZO54c48=

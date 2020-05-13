@@ -12,6 +12,7 @@ require (
 	github.com/pilu/config v0.0.0-20131214182432-3eb99e6c0b9a // indirect
 	github.com/pilu/fresh v0.0.0-20190826141211-0fa698148017 // indirect
 	github.com/reactivex/rxgo/v2 v2.0.1
+	github.com/rs/cors v1.7.0
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.5.1 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect

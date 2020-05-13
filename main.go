@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	linkstatus "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus"
 	scannertasks "github.com/stottle-uk/my-first-go-app/internal/features/scannerTasks"
 	websocket "github.com/stottle-uk/my-first-go-app/internal/features/websocket"
@@ -20,7 +21,14 @@ func main() {
 	linkstatus.Init(subRouter(router, "/link-status"), hub)
 	websocket.Init(subRouter(router, "/ws"), handler)
 
-	http.Handle("/", router)
+	cr := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3001"},
+		AllowCredentials: true,
+		Debug:            false,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+	})
+	crHandler := cr.Handler(router)
+	http.Handle("/", crHandler)
 	http.ListenAndServe(":8080", nil)
 }
 
