@@ -2,6 +2,7 @@ package storagemongo
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -10,15 +11,19 @@ import (
 )
 
 // NewDb : NewDb
-func NewDb() (*mongo.Database, error) {
+func NewDb() *mongo.Database {
 	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	cs, err := connstring.Parse("mongodb://localhost:27017/testing123")
 	if err != nil {
-		return nil, err
+		log.Printf("Connection String Error: %v", err)
 	}
 
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(cs.String()))
-	return client.Database(cs.Database), err
+	if err != nil {
+		log.Printf("Mongo Connect Error: %v", err)
+	}
+
+	return client.Database(cs.Database)
 }
