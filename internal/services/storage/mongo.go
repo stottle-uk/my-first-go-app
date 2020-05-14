@@ -5,13 +5,24 @@ import (
 	"log"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
 )
 
+// Database : Database
+type Database struct {
+	Db *mongo.Database
+}
+
+// Collection : Collection
+type Collection struct {
+	Col *mongo.Collection
+}
+
 // NewDb : NewDb
-func NewDb() *mongo.Database {
+func NewDb() *Database {
 	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -25,5 +36,24 @@ func NewDb() *mongo.Database {
 		log.Printf("Mongo Connect Error: %v", err)
 	}
 
-	return client.Database(cs.Database)
+	return &Database{
+		Db: client.Database(cs.Database),
+	}
+}
+
+// Collection : Collection
+func (s *Database) Collection(name string) *Collection {
+	return &Collection{Col: s.Db.Collection(name)}
+}
+
+// InsertOne : InsertOne
+func (c *Collection) InsertOne(doc interface{}) (string, error) {
+	result, err := c.Col.InsertOne(context.Background(), doc)
+	if err != nil {
+		return "", err
+	}
+
+	itemID := result.InsertedID.(primitive.ObjectID).Hex()
+
+	return itemID, nil
 }

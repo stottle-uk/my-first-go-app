@@ -8,14 +8,14 @@ import (
 	store "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/storage"
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 	redirect "github.com/stottle-uk/my-first-go-app/internal/services/redirect"
-	"go.mongodb.org/mongo-driver/mongo"
+	storage "github.com/stottle-uk/my-first-go-app/internal/services/storage"
 )
 
 // Options : Options
 type Options struct {
 	Router   *mux.Router
 	Hub      *wshub.Hub
-	Db       *mongo.Database
+	Db       *storage.Database
 	Redirect *redirect.Redirect
 }
 

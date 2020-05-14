@@ -10,7 +10,7 @@ import (
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 	redirect "github.com/stottle-uk/my-first-go-app/internal/services/redirect"
 	router "github.com/stottle-uk/my-first-go-app/internal/services/router"
-	storagemongo "github.com/stottle-uk/my-first-go-app/internal/services/storage"
+	storage "github.com/stottle-uk/my-first-go-app/internal/services/storage"
 )
 
 func main() {
@@ -18,7 +18,7 @@ func main() {
 	router := router.New()
 	hub, handler := wshub.CreateHub()
 	redirect := redirect.New()
-	db := storagemongo.NewDb()
+	db := storage.NewDb()
 
 	scannertasks.New(scannertasks.Options{
 		Router: router.SubRouter("/scanner-tasks"),

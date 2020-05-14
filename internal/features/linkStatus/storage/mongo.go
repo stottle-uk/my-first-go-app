@@ -1,37 +1,23 @@
 package linkstatusmongo
 
 import (
-	"context"
-	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-
 	domains "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/domains"
+	storage "github.com/stottle-uk/my-first-go-app/internal/services/storage"
 )
 
 // LinkStatusRepo : LinkStatusRepo
 type LinkStatusRepo struct {
-	collection     *mongo.Collection
-	defaultTimeout time.Duration
+	col *storage.Collection
 }
 
 // New : New
-func New(db *mongo.Database) *LinkStatusRepo {
+func New(db *storage.Database) *LinkStatusRepo {
 	return &LinkStatusRepo{
-		collection:     db.Collection("links"),
-		defaultTimeout: 5 * time.Second,
+		col: db.Collection("links"),
 	}
 }
 
 // Insert : Insert
 func (repo *LinkStatusRepo) Insert(doc domains.LinkStatus) (string, error) {
-	result, err := repo.collection.InsertOne(context.Background(), doc)
-	if err != nil {
-		return "", err
-	}
-
-	itemID := result.InsertedID.(primitive.ObjectID).Hex()
-
-	return itemID, nil
+	return repo.col.InsertOne(doc)
 }
