@@ -13,12 +13,12 @@ import (
 
 // Database : Database
 type Database struct {
-	Db *mongo.Database
+	db *mongo.Database
 }
 
 // Collection : Collection
 type Collection struct {
-	Col *mongo.Collection
+	col *mongo.Collection
 }
 
 // NewDb : NewDb
@@ -37,18 +37,18 @@ func NewDb() *Database {
 	}
 
 	return &Database{
-		Db: client.Database(cs.Database),
+		db: client.Database(cs.Database),
 	}
 }
 
 // Collection : Collection
 func (s *Database) Collection(name string) *Collection {
-	return &Collection{Col: s.Db.Collection(name)}
+	return &Collection{col: s.db.Collection(name)}
 }
 
 // InsertOne : InsertOne
 func (c *Collection) InsertOne(doc interface{}) (string, error) {
-	result, err := c.Col.InsertOne(context.Background(), doc)
+	result, err := c.col.InsertOne(context.Background(), doc)
 	if err != nil {
 		return "", err
 	}

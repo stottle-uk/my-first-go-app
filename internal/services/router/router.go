@@ -9,19 +9,19 @@ import (
 
 // Router : Hub
 type Router struct {
-	Base *mux.Router
+	base *mux.Router
 }
 
 // New : New
 func New() *Router {
 	return &Router{
-		Base: mux.NewRouter(),
+		base: mux.NewRouter(),
 	}
 }
 
 // SubRouter : SubRouter
 func (r *Router) SubRouter(path string) *mux.Router {
-	return r.Base.PathPrefix(path).Subrouter()
+	return r.base.PathPrefix(path).Subrouter()
 }
 
 // UseCors : UseCors
@@ -32,5 +32,5 @@ func (r *Router) UseCors() http.Handler {
 		Debug:            false,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 	})
-	return cr.Handler(r.Base)
+	return cr.Handler(r.base)
 }

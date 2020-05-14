@@ -7,20 +7,20 @@ import (
 
 // Redirect : Hub
 type Redirect struct {
-	BaseURL string
+	baseURL string
 }
 
 // New : New
 func New() *Redirect {
 	return &Redirect{
-		BaseURL: "http://localhost:3333/api",
+		baseURL: "http://localhost:3333/api",
 	}
 }
 
 // Do : Do
 func (h *Redirect) Do(url string, body []byte, r *http.Request) (*http.Response, error) {
 	z := bytes.NewBuffer(body)
-	proxyReq, err := http.NewRequest(r.Method, h.BaseURL+url, z)
+	proxyReq, err := http.NewRequest(r.Method, h.baseURL+url, z)
 	if err != nil {
 		return nil, err
 	}
