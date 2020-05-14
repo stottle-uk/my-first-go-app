@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Init : Init
-func Init(router *mux.Router, handler func(w http.ResponseWriter, r *http.Request)) {
+// New : New
+func New(router *mux.Router, handler func(w http.ResponseWriter, r *http.Request)) {
 	router.HandleFunc("/{id}", handler)
 }
