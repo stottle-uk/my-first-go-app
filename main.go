@@ -25,9 +25,19 @@ func main() {
 		log.Printf("Insert Error: %v", err)
 	}
 
-	scannertasks.New(subRouter(router, "/scanner-tasks"), hub)
-	linkstatus.New(subRouter(router, "/link-status"), hub, db, redirect)
-	websocket.New(subRouter(router, "/ws"), handler)
+	scannertasks.New(scannertasks.Options{
+		Router: subRouter(router, "/scanner-tasks"),
+		Hub:    hub})
+
+	linkstatus.New(linkstatus.Options{
+		Router:   subRouter(router, "/link-status"),
+		Hub:      hub,
+		Db:       db,
+		Redirect: redirect})
+
+	websocket.New(websocket.Options{
+		Router:  subRouter(router, "/ws"),
+		Handler: handler})
 
 	cr := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3001"},

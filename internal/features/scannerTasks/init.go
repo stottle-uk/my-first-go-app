@@ -8,15 +8,21 @@ import (
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 )
 
+// Options : Options
+type Options struct {
+	Router *mux.Router
+	Hub    *wshub.Hub
+}
+
 // New : New
-func New(router *mux.Router, hub *wshub.Hub) {
+func New(options Options) {
 	scannertasksAPI, err := api.NewAPI(api.Options{
-		Hub: hub,
+		Hub: options.Hub,
 	})
 	if err != nil {
 		fmt.Println(err)
 	}
-	router.HandleFunc("/{id:[0-9]+}", scannertasksAPI.UpdateTask).Methods("POST")
+	options.Router.HandleFunc("/{id:[0-9]+}", scannertasksAPI.UpdateTask).Methods("POST")
 
 	go scannertasksAPI.HandleReceived()
 }
