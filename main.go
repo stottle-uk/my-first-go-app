@@ -11,6 +11,7 @@ import (
 	scannertasks "github.com/stottle-uk/my-first-go-app/internal/features/scannerTasks"
 	websocket "github.com/stottle-uk/my-first-go-app/internal/features/websocket"
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
+	redirect "github.com/stottle-uk/my-first-go-app/internal/services/redirect"
 	storagemongo "github.com/stottle-uk/my-first-go-app/internal/services/storage"
 )
 
@@ -18,13 +19,14 @@ func main() {
 	flag.Parse()
 	router := mux.NewRouter()
 	hub, handler := wshub.CreateHub()
+	redirect := redirect.New()
 	db, err := storagemongo.NewDb()
 	if err != nil {
 		log.Printf("Insert Error: %v", err)
 	}
 
 	scannertasks.New(subRouter(router, "/scanner-tasks"), hub)
-	linkstatus.New(subRouter(router, "/link-status"), hub, db)
+	linkstatus.New(subRouter(router, "/link-status"), hub, db, redirect)
 	websocket.New(subRouter(router, "/ws"), handler)
 
 	cr := cors.New(cors.Options{

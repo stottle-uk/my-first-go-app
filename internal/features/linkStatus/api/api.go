@@ -1,7 +1,6 @@
 package linkstatusapi
 
 import (
-	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -10,25 +9,29 @@ import (
 	domains "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/domains"
 	store "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/storage"
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
+	redirect "github.com/stottle-uk/my-first-go-app/internal/services/redirect"
 )
 
 // API : API
 type API struct {
-	hub   *wshub.Hub
-	store *store.LinkStatusRepo
+	hub      *wshub.Hub
+	store    *store.LinkStatusRepo
+	redirect *redirect.Redirect
 }
 
 // Options : Options
 type Options struct {
-	Hub   *wshub.Hub
-	Store *store.LinkStatusRepo
+	Hub      *wshub.Hub
+	Store    *store.LinkStatusRepo
+	Redirect *redirect.Redirect
 }
 
 // NewAPI : NewAPI
 func NewAPI(options Options) (*API, error) {
 	s := &API{
-		hub:   options.Hub,
-		store: options.Store,
+		hub:      options.Hub,
+		store:    options.Store,
+		redirect: options.Redirect,
 	}
 	return s, nil
 }
@@ -56,24 +59,11 @@ func (s *API) AddLink(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	z := bytes.NewBuffer(requestData)
-	proxyReq, err := http.NewRequest(r.Method, "http://localhost:3333/api/links", z)
 
-	for header, values := range r.Header {
-		for _, value := range values {
-			proxyReq.Header.Add(header, value)
-		}
-	}
-
-	client := &http.Client{}
-	res, err := client.Do(proxyReq)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	res, err := s.redirect.Do("/links", requestData, r)
 
 	// Write body back to response
-	body2, err := ioutil.ReadAll(res.Body)
+	bodyAdmin, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -86,7 +76,7 @@ func (s *API) AddLink(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Insert ID: %v", ins)
 
-	_, err = w.Write(body2)
+	_, err = w.Write(bodyAdmin)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

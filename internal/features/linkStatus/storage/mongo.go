@@ -34,5 +34,4 @@ func (repo *LinkStatusRepo) Insert(doc domains.LinkStatus) (string, error) {
 	itemID := result.InsertedID.(primitive.ObjectID).Hex()
 
 	return itemID, nil
-
 }

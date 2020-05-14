@@ -11,7 +11,7 @@ import (
 
 // NewDb : NewDb
 func NewDb() (*mongo.Database, error) {
-	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	cs, err := connstring.Parse("mongodb://localhost:27017/testing123")
