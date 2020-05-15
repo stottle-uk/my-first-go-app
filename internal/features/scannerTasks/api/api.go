@@ -5,17 +5,17 @@ import (
 	"log"
 	"net/http"
 
-	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
+	hub "github.com/stottle-uk/my-first-go-app/internal/features/hub"
 )
 
 // API : API
 type API struct {
-	hub *wshub.Hub
+	hub *hub.Hub
 }
 
 // Options : Options
 type Options struct {
-	Hub *wshub.Hub
+	Hub *hub.Hub
 }
 
 // NewAPI : NewAPI
@@ -36,9 +36,7 @@ func (s *API) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func() {
-		s.hub.Broadcast <- body
-	}()
+	s.hub.Broadcast <- body
 
 	w.WriteHeader(201)
 }

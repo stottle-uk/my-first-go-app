@@ -20,7 +20,7 @@ type Hub struct {
 	unregister     chan *client
 	Received       chan []byte
 	Broadcast      chan []byte
-	SendRestricted chan Message
+	SendRestricted chan *Message
 }
 
 var upgrader = websocket.Upgrader{
@@ -57,7 +57,7 @@ func newHub() *Hub {
 		unregister:     make(chan *client),
 		Received:       make(chan []byte),
 		Broadcast:      make(chan []byte),
-		SendRestricted: make(chan Message),
+		SendRestricted: make(chan *Message),
 	}
 }
 

@@ -3,15 +3,15 @@ package scannertasks
 import (
 	"fmt"
 
+	hub "github.com/stottle-uk/my-first-go-app/internal/features/hub"
 	api "github.com/stottle-uk/my-first-go-app/internal/features/scannerTasks/api"
-	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 	router "github.com/stottle-uk/my-first-go-app/internal/services/router"
 )
 
 // Options : Options
 type Options struct {
 	Router *router.Router
-	Hub    *wshub.Hub
+	Hub    *hub.Hub
 }
 
 // New : New

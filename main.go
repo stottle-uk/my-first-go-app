@@ -4,10 +4,10 @@ import (
 	"flag"
 	"net/http"
 
+	myhub "github.com/stottle-uk/my-first-go-app/internal/features/hub"
 	linkstatus "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus"
 	scannertasks "github.com/stottle-uk/my-first-go-app/internal/features/scannerTasks"
 	websocket "github.com/stottle-uk/my-first-go-app/internal/features/websocket"
-	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 	redirect "github.com/stottle-uk/my-first-go-app/internal/services/redirect"
 	router "github.com/stottle-uk/my-first-go-app/internal/services/router"
 	storage "github.com/stottle-uk/my-first-go-app/internal/services/storage"
@@ -16,9 +16,9 @@ import (
 func main() {
 	flag.Parse()
 	router := router.New()
-	hub, handler := wshub.CreateHub()
-	redirect := redirect.New()
 	db := storage.NewDb()
+	hub, handler := myhub.NewHub(db.Collection("tasks"))
+	redirect := redirect.New()
 
 	scannertasks.New(scannertasks.Options{
 		Router: router.SubRouter("/scanner-tasks"),

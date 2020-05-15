@@ -27,9 +27,3 @@ type LinkStatusAdmin struct {
 	TaskID      int    `json:"task_id"`
 	ProductID   int    `json:"product_id"`
 }
-
-// Task : Task
-type Task struct {
-	TaskID int `json:"taskId"`
-	UserID int `json:"userId"`
-}
