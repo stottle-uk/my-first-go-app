@@ -8,20 +8,17 @@ import (
 
 	domains "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/domains"
 	store "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/storage"
-	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
 	redirect "github.com/stottle-uk/my-first-go-app/internal/services/redirect"
 )
 
 // API : API
 type API struct {
-	hub      *wshub.Hub
 	store    *store.LinkStatusRepo
 	redirect *redirect.Redirect
 }
 
 // Options : Options
 type Options struct {
-	Hub      *wshub.Hub
 	Store    *store.LinkStatusRepo
 	Redirect *redirect.Redirect
 }
@@ -29,7 +26,6 @@ type Options struct {
 // NewAPI : NewAPI
 func NewAPI(options Options) *API {
 	return &API{
-		hub:      options.Hub,
 		store:    options.Store,
 		redirect: options.Redirect,
 	}
@@ -61,7 +57,6 @@ func (s *API) AddLink(w http.ResponseWriter, r *http.Request) {
 
 	res, err := s.redirect.Do("/links", requestData, r)
 
-	// Write body back to response
 	bodyAdmin, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -88,8 +83,4 @@ func (s *API) AddLink(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.Header().Add("Content-Type", "application/json")
-
-	go func() {
-		s.hub.SendRestricted <- wshub.Message{ClientIds: []string{"cliendId123"}, Data: body}
-	}()
 }

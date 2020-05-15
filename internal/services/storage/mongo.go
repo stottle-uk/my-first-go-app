@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // Database : Database
@@ -18,7 +19,8 @@ type Database struct {
 
 // Collection : Collection
 type Collection struct {
-	col *mongo.Collection
+	col            *mongo.Collection
+	defaultTimeout time.Duration
 }
 
 // NewDb : NewDb
@@ -43,7 +45,10 @@ func NewDb() *Database {
 
 // Collection : Collection
 func (s *Database) Collection(name string) *Collection {
-	return &Collection{col: s.db.Collection(name)}
+	return &Collection{
+		col:            s.db.Collection(name),
+		defaultTimeout: 5 * time.Second,
+	}
 }
 
 // InsertOne : InsertOne
@@ -56,4 +61,22 @@ func (c *Collection) InsertOne(doc interface{}) (string, error) {
 	itemID := result.InsertedID.(primitive.ObjectID).Hex()
 
 	return itemID, nil
+}
+
+// FindOne : FindOne
+func (c *Collection) FindOne(filter, out interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.defaultTimeout)
+	defer cancel()
+
+	return c.col.FindOne(ctx, filter).Decode(out)
+}
+
+// GetByID : GetByID
+func (c *Collection) GetByID(itemID string, out interface{}) error {
+	objectID, err := primitive.ObjectIDFromHex(itemID)
+	if err != nil {
+		return err
+	}
+
+	return c.FindOne(bson.M{"_id": objectID}, out)
 }

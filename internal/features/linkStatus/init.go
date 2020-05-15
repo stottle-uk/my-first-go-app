@@ -20,11 +20,17 @@ type Options struct {
 
 // New : New
 func New(options Options) {
+	store := store.New(options.Db, options.Hub)
+
 	api := api.NewAPI(api.Options{
-		Hub:      options.Hub,
-		Store:    store.New(options.Db),
+		Store:    store,
 		Redirect: options.Redirect,
 	})
-	routes := routes.NewRoutes(routes.Options{Router: options.Router, API: api})
+
+	routes := routes.NewRoutes(routes.Options{
+		Router: options.Router,
+		API:    api,
+	})
+
 	routes.UseRoutes()
 }
