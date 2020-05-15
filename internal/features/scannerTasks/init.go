@@ -3,14 +3,14 @@ package scannertasks
 import (
 	"fmt"
 
-	"github.com/gorilla/mux"
 	api "github.com/stottle-uk/my-first-go-app/internal/features/scannerTasks/api"
 	wshub "github.com/stottle-uk/my-first-go-app/internal/services/hub"
+	router "github.com/stottle-uk/my-first-go-app/internal/services/router"
 )
 
 // Options : Options
 type Options struct {
-	Router *mux.Router
+	Router *router.Router
 	Hub    *wshub.Hub
 }
 
@@ -22,7 +22,7 @@ func New(options Options) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	options.Router.HandleFunc("/{id:[0-9]+}", scannertasksAPI.UpdateTask).Methods("POST")
+	options.Router.HandlePost("/{id:[0-9]+}", scannertasksAPI.UpdateTask)
 
 	go scannertasksAPI.HandleReceived()
 }

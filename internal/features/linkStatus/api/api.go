@@ -27,13 +27,12 @@ type Options struct {
 }
 
 // NewAPI : NewAPI
-func NewAPI(options Options) (*API, error) {
-	s := &API{
+func NewAPI(options Options) *API {
+	return &API{
 		hub:      options.Hub,
 		store:    options.Store,
 		redirect: options.Redirect,
 	}
-	return s, nil
 }
 
 // AddLink : AddLink

@@ -20,8 +20,10 @@ func New() *Router {
 }
 
 // SubRouter : SubRouter
-func (r *Router) SubRouter(path string) *mux.Router {
-	return r.base.PathPrefix(path).Subrouter()
+func (r *Router) SubRouter(path string) *Router {
+	return &Router{
+		base: r.base.PathPrefix(path).Subrouter(),
+	}
 }
 
 // UseCors : UseCors
@@ -33,4 +35,14 @@ func (r *Router) UseCors() http.Handler {
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 	})
 	return cr.Handler(r.base)
+}
+
+// Handle : Handle
+func (r *Router) Handle(path string, handler func(w http.ResponseWriter, r *http.Request)) {
+	r.base.HandleFunc(path, handler)
+}
+
+// HandlePost : HandlePost
+func (r *Router) HandlePost(path string, handler func(w http.ResponseWriter, r *http.Request)) {
+	r.base.HandleFunc(path, handler).Methods("POST")
 }
