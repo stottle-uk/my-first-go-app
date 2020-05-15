@@ -14,13 +14,16 @@ import (
 type Options struct {
 	Router   *router.Router
 	Hub      *hub.Hub
-	Db       *storage.Database
+	Col      *storage.Collection
 	Redirect *redirect.Redirect
 }
 
 // New : New
 func New(options Options) {
-	store := store.New(options.Db, options.Hub)
+	store := store.New(store.Options{
+		Links: options.Col,
+		Hub:   options.Hub,
+	})
 
 	api := api.NewAPI(api.Options{
 		Store:    store,

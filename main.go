@@ -22,17 +22,20 @@ func main() {
 
 	scannertasks.New(scannertasks.Options{
 		Router: router.SubRouter("/scanner-tasks"),
-		Hub:    hub})
+		Hub:    hub,
+	})
 
 	linkstatus.New(linkstatus.Options{
 		Router:   router.SubRouter("/link-status"),
 		Hub:      hub,
-		Db:       db,
-		Redirect: redirect})
+		Col:      db.Collection("links"),
+		Redirect: redirect,
+	})
 
 	websocket.New(websocket.Options{
 		Router:  router.SubRouter("/ws"),
-		Handler: handler})
+		Handler: handler,
+	})
 
 	http.Handle("/", router.UseCors())
 	http.ListenAndServe(":8080", nil)

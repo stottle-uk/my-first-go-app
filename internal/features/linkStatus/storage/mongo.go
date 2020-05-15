@@ -14,11 +14,17 @@ type LinkStatusRepo struct {
 	hub   *hub.Hub
 }
 
+// Options : Options
+type Options struct {
+	Links *storage.Collection
+	Hub   *hub.Hub
+}
+
 // New : New
-func New(db *storage.Database, hub *hub.Hub) *LinkStatusRepo {
+func New(options Options) *LinkStatusRepo {
 	return &LinkStatusRepo{
-		links: db.Collection("links"),
-		hub:   hub,
+		links: options.Links,
+		hub:   options.Hub,
 	}
 }
 
