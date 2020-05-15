@@ -19,7 +19,10 @@ type Options struct {
 
 // NewRoutes : NewRoutes
 func NewRoutes(options Options) *Routes {
-	return &Routes{router: options.Router, api: options.API}
+	return &Routes{
+		router: options.Router,
+		api:    options.API,
+	}
 }
 
 // UseRoutes : UseRoutes
