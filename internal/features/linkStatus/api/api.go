@@ -3,23 +3,22 @@ package linkstatusapi
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	domains "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/domains"
-	store "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/storage"
+	hub "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/hub"
 	redirect "github.com/stottle-uk/my-first-go-app/internal/services/redirect"
 )
 
 // API : API
 type API struct {
-	store    *store.LinkStatusRepo
+	store    *hub.LinkStatusHub
 	redirect *redirect.Redirect
 }
 
 // Options : Options
 type Options struct {
-	Store    *store.LinkStatusRepo
+	Store    *hub.LinkStatusHub
 	Redirect *redirect.Redirect
 }
 
@@ -37,9 +36,44 @@ func (s *API) AddLink(w http.ResponseWriter, r *http.Request) {
 
 	linkStatus := domains.LinkStatus{}
 	if err := json.Unmarshal(body, &linkStatus); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.handleError(w, err)
+		return
 	}
 
+	res, err := s.addLinkAdmin(linkStatus, r)
+	if err != nil {
+		s.handleError(w, err)
+		return
+	}
+
+	bodyAdmin, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		s.handleError(w, err)
+		return
+	}
+
+	ins, err := s.store.AddLink(linkStatus)
+	if err != nil {
+		s.handleError(w, err)
+		return
+	}
+
+	w.Header().Add("x-inserted-id", ins)
+	for header, values := range res.Header {
+		for _, value := range values {
+			w.Header().Add(header, value)
+		}
+	}
+	w.WriteHeader(res.StatusCode)
+
+	_, err = w.Write(bodyAdmin)
+	if err != nil {
+		s.handleError(w, err)
+		return
+	}
+}
+
+func (s *API) addLinkAdmin(linkStatus domains.LinkStatus, r *http.Request) (*http.Response, error) {
 	linkStatusAdmin := domains.LinkStatusRequestAdmin{
 		Data: domains.LinkStatusAdmin{
 			URL:         linkStatus.URL,
@@ -51,36 +85,12 @@ func (s *API) AddLink(w http.ResponseWriter, r *http.Request) {
 
 	requestData, err := json.Marshal(linkStatusAdmin)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
-	res, err := s.redirect.Do("/links", requestData, r)
+	return s.redirect.Do("/links", requestData, r)
+}
 
-	bodyAdmin, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	ins, err := s.store.Insert(linkStatus)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	log.Printf("Insert ID: %v", ins)
-
-	_, err = w.Write(bodyAdmin)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Write header
-	for header, values := range res.Header {
-		for _, value := range values {
-			w.Header().Add(header, value)
-		}
-	}
-	w.Header().Add("Content-Type", "application/json")
+func (s *API) handleError(w http.ResponseWriter, err error) {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
 }
