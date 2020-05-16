@@ -39,10 +39,14 @@ func (r *Router) UseCors() http.Handler {
 
 // Handle : Handle
 func (r *Router) Handle(path string, handler func(w http.ResponseWriter, r *http.Request)) {
-	r.base.HandleFunc(path, handler)
+	r.handle(path, handler)
 }
 
 // HandlePost : HandlePost
 func (r *Router) HandlePost(path string, handler func(w http.ResponseWriter, r *http.Request)) {
-	r.base.HandleFunc(path, handler).Methods("POST")
+	r.handle(path, handler).Methods("POST")
+}
+
+func (r *Router) handle(path string, handler func(w http.ResponseWriter, r *http.Request)) *mux.Route {
+	return r.base.HandleFunc(path, handler)
 }
