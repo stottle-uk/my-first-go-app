@@ -1,5 +1,10 @@
 package lnkstatusdomains
 
+// LinkChecker : LinkChecker
+type LinkChecker interface {
+	AddLink(doc LinkStatus) (string, error)
+}
+
 // LinkLookup : LinkLookup
 type LinkLookup struct {
 	Link string

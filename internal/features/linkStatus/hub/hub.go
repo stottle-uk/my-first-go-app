@@ -5,32 +5,31 @@ import (
 
 	hub "github.com/stottle-uk/my-first-go-app/internal/features/hub"
 	domains "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/domains"
-	store "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/storage"
 )
 
 // LinkStatusHub : LinkStatusHub
 type LinkStatusHub struct {
-	hub   *hub.Hub
-	store *store.LinkStatusRepo
+	hub     *hub.Hub
+	checker domains.LinkChecker
 }
 
 // Options : Options
 type Options struct {
-	Hub   *hub.Hub
-	Store *store.LinkStatusRepo
+	Hub     *hub.Hub
+	Checker domains.LinkChecker
 }
 
 // New : New
 func New(options Options) *LinkStatusHub {
 	return &LinkStatusHub{
-		store: options.Store,
-		hub:   options.Hub,
+		hub:     options.Hub,
+		checker: options.Checker,
 	}
 }
 
 // AddLink : AddLink
 func (repo *LinkStatusHub) AddLink(doc domains.LinkStatus) (string, error) {
-	insertID, err := repo.store.AddLink(doc)
+	insertID, err := repo.checker.AddLink(doc)
 	if err != nil {
 		return "", err
 	}

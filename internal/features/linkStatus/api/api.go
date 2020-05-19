@@ -6,26 +6,25 @@ import (
 	"net/http"
 
 	domains "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/domains"
-	hub "github.com/stottle-uk/my-first-go-app/internal/features/linkStatus/hub"
 	redirect "github.com/stottle-uk/my-first-go-app/internal/services/redirect"
 )
 
 // API : API
 type API struct {
-	store    *hub.LinkStatusHub
 	redirect *redirect.Redirect
+	checker  domains.LinkChecker
 }
 
 // Options : Options
 type Options struct {
-	Store    *hub.LinkStatusHub
 	Redirect *redirect.Redirect
+	Checker  domains.LinkChecker
 }
 
 // NewAPI : NewAPI
 func NewAPI(options Options) *API {
 	return &API{
-		store:    options.Store,
+		checker:  options.Checker,
 		redirect: options.Redirect,
 	}
 }
@@ -52,7 +51,7 @@ func (s *API) AddLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ins, err := s.store.AddLink(linkStatus)
+	ins, err := s.checker.AddLink(linkStatus)
 	if err != nil {
 		s.handleError(w, err)
 		return

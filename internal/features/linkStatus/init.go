@@ -26,13 +26,13 @@ func New(options Options) {
 	})
 
 	hub := lsHub.New(lsHub.Options{
-		Hub:   options.Hub,
-		Store: store,
+		Hub:     options.Hub,
+		Checker: store,
 	})
 
 	api := api.NewAPI(api.Options{
-		Store:    hub,
 		Redirect: options.Redirect,
+		Checker:  hub,
 	})
 
 	routes := routes.NewRoutes(routes.Options{
